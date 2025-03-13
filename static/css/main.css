@@ -9,6 +9,10 @@
     --gray-2: #edeef0;
 }
 
+* {
+    user-select: none;
+}
+
 *,
 *:before,
 *:after {

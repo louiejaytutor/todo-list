@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dane's To-Do List</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="static/css/main.css">
+    <link rel="stylesheet" href="static/css/loader.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Dane's To-Do List</h2>
+            <div class="navigation">
+                <button id="pending-tasks" class="active">Home</a>
+                <button id="completed-tasks">Completed</a>
+                <button id="trash-tasks" onclick="trashTasks()">Trash</a>
+            </div>
+            <div id="new-task" class="new-task">
+                <input type="text" id="task" placeholder="Task to be done...">
+                <button onclick="submitTask()">Submit</button>
+            </div>
+        </div>
+        <div id="tasks" class="tasks">
+            <div id="loader" class="loader">
+                <span class="loader-text">loading</span>
+                <span class="load"></span>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+        import {
+            getFirestore, collection, getDocs, doc, addDoc, serverTimestamp, updateDoc, deleteDoc
+        } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyACGoc6lsu92SIBil2oA-FEfVkAocIpe00",
+            authDomain: "todo-list-c310f.firebaseapp.com",
+            projectId: "todo-list-c310f",
+            storageBucket: "todo-list-c310f.firebasestorage.app",
+            messagingSenderId: "1954381734",
+            appId: "1:1954381734:web:466c42e5ddbcea8dcd1967",
+            measurementId: "G-2RK9RRWMC2"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        const pending_btn = document.getElementById("pending-tasks");
+        const completed_btn = document.getElementById("completed-tasks");
+        const trash_btn = document.getElementById("trash-tasks");
+
+        const new_task = document.getElementById("new-task");
+        const tasks = document.getElementById("tasks");
+
+        fetchData();
+
+        pending_btn.addEventListener("click", function() {
+            pending_btn.classList.add("active");
+            completed_btn.classList.remove("active");
+            trash_btn.classList.remove("active");
+            new_task.style.display = "flex";
+
+            showLoader();
+            fetchData();
+        });
+
+        completed_btn.addEventListener("click", function() {
+            pending_btn.classList.remove("active");
+            completed_btn.classList.add("active");
+            trash_btn.classList.remove("active");
+            new_task.style.display = "none";
+
+            showLoader();
+            completedTasks();
+        });
+
+        trash_btn.addEventListener("click", function() {
+            pending_btn.classList.remove("active");
+            completed_btn.classList.remove("active");
+            trash_btn.classList.add("active");
+            new_task.style.display = "none";
+
+            showLoader();
+            trashTasks();
+        });
+
+        async function showLoader() {
+            tasks.innerHTML = "";
+            tasks.innerHTML = tasks.innerHTML + `<div id="loader" class="loader">
+                <span class="loader-text">loading</span>
+                <span class="load"></span>
+            </div>`;
+        }
+
+        function formatTimestamp(timestamp) {
+                const date = timestamp.toDate();
+                return date.toLocaleString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true
+                });
+            }
+
+        async function fetchData() {
+            const querySnapshot = await getDocs(collection(db, "todo-list"));
+            tasks.innerHTML = "";
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.status == "pending") {
+                    tasks.innerHTML = tasks.innerHTML + `<div class="task">
+                        <span>${data.task}</span>
+                        <span class="timestamp">${formatTimestamp(data.timestamp)}</span>
+                        <div class="buttons">
+                            <button onclick="completeTask('${doc.id}')"><i class="fas fa-check-circle"></i></button>
+                            <button onclick="removeTask('${doc.id}')"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>`;
+                }
+            });
+        }
+
+        async function completedTasks() {
+            const querySnapshot = await getDocs(collection(db, "todo-list"));
+            tasks.innerHTML = "";
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.status == "completed") {
+                    tasks.innerHTML = tasks.innerHTML + `<div class="task">
+                        <span>${data.task}</span>
+                        <span class="timestamp">${formatTimestamp(data.timestamp_update)}</span>
+                    </div>`;
+                }
+            });
+        }
+
+        async function trashTasks() {
+            const querySnapshot = await getDocs(collection(db, "todo-list"));
+            tasks.innerHTML = "";
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.status == "removed") {
+                    tasks.innerHTML = tasks.innerHTML + `<div class="task">
+                        <span>${data.task}</span>
+                        <span class="timestamp">${formatTimestamp(data.timestamp_update)}</span>
+                        <div class="buttons">
+                            <button onclick="restoreTask('${doc.id}')"><i class="fas fa-trash-restore"></i></button>
+                            <button onclick="deleteTask('${doc.id}')"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>`;
+                }
+            });
+        }
+
+        window.submitTask = async function submitTask() {
+            showLoader();
+            
+            let taskInput = document.getElementById("task");
+            if (taskInput.value == "") {
+                alert("Please input task.");
+            }
+            else {
+                await addDoc(collection(db, "todo-list"), {
+                    task: taskInput.value,
+                    status: "pending",
+                    timestamp: serverTimestamp()
+                });
+
+                taskInput.value = "";
+                fetchData();
+            }
+        }
+
+        window.completeTask = async function completeTask(id) {            
+            if (confirm("Are you sure you want to complete this task?")) {
+                showLoader();
+
+                const taskRef = doc(db, "todo-list", id);
+
+                await updateDoc(taskRef, {
+                    status: "completed",
+                    timestamp_update: serverTimestamp()
+                });
+
+                fetchData();
+            }
+        }
+
+        window.removeTask = async function removeTask(id) {
+            showLoader();
+            
+            const taskRef = doc(db, "todo-list", id);
+
+            await updateDoc(taskRef, {
+                status: "removed",
+                timestamp_update: serverTimestamp()
+            });
+
+            fetchData();
+        }
+
+        window.restoreTask = async function restoreTask(id) {
+            showLoader();
+
+            const taskRef = doc(db, "todo-list", id);
+
+            await updateDoc(taskRef, {
+                status: "pending",
+                timestamp_update: serverTimestamp()
+            });
+
+            trashTasks();
+        }
+
+        window.deleteTask = async function deleteTask(id) {
+            if (confirm("Are you sure you want to permanently delete this task?")) {
+                showLoader();
+
+                const taskRef = doc(db, "todo-list", id);
+
+                await deleteDoc(taskRef);
+
+                trashTasks();
+            }
+        }
+    </script>
+</body>
+</html>

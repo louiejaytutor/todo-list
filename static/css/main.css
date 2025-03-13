@@ -11,11 +11,6 @@
 
 * {
     user-select: none;
-}
-
-*,
-*:before,
-*:after {
     font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;

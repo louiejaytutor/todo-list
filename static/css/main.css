@@ -62,6 +62,7 @@ body {
     border-radius: 30px;
     padding-left: 20px;
     margin-top: 40px;
+    width: 100%;
 }
 .header .new-task input {
     flex: 1;

@@ -134,12 +134,8 @@ body {
 }
 
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 510px) {
     .header {
-        width: calc(100% - 20px);
-        margin-top: calc(100vw - 450px);
-    }
-    .tasks {
-        width: calc(100% - 20px);
+        margin-top: 20px;
     }
 }

@@ -61,7 +61,7 @@
         const new_task = document.getElementById("new-task");
         const tasks = document.getElementById("tasks");
 
-        fetchData();
+        pendingTasks();
 
         pending_btn.addEventListener("click", function() {
             pending_btn.classList.add("active");
@@ -70,7 +70,7 @@
             new_task.style.display = "flex";
 
             showLoader();
-            fetchData();
+            pendingTasks();
         });
 
         completed_btn.addEventListener("click", function() {
@@ -114,13 +114,16 @@
                 });
             }
 
-        async function fetchData() {
+        async function pendingTasks() {
             const querySnapshot = await getDocs(collection(db, "todo-list"));
+            let hasPendingTasks = false;
             tasks.innerHTML = "";
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 if (data.status == "pending") {
+                    hasPendingTasks = true;
+
                     tasks.innerHTML = tasks.innerHTML + `<div class="task">
                         <span>${data.task}</span>
                         <span class="timestamp">${formatTimestamp(data.timestamp)}</span>
@@ -131,30 +134,48 @@
                     </div>`;
                 }
             });
+
+            if (!hasPendingTasks || querySnapshot.empty) {
+                tasks.innerHTML = `<div class="task">
+                    <span class="no-task">No pending tasks.</span>
+                </div>`;
+            }
         }
 
         async function completedTasks() {
             const querySnapshot = await getDocs(collection(db, "todo-list"));
+            let hasCompletedTasks = false;
             tasks.innerHTML = "";
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 if (data.status == "completed") {
+                    hasCompletedTasks = true;
+
                     tasks.innerHTML = tasks.innerHTML + `<div class="task">
                         <span>${data.task}</span>
                         <span class="timestamp">${formatTimestamp(data.timestamp_update)}</span>
                     </div>`;
                 }
             });
+
+            if (!hasCompletedTasks || querySnapshot.empty) {
+                tasks.innerHTML = `<div class="task">
+                    <span class="no-task">No completed tasks.</span>
+                </div>`;
+            }
         }
 
         async function trashTasks() {
             const querySnapshot = await getDocs(collection(db, "todo-list"));
+            let hasRemovedTasks = false;
             tasks.innerHTML = "";
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 if (data.status == "removed") {
+                    hasRemovedTasks = true;
+
                     tasks.innerHTML = tasks.innerHTML + `<div class="task">
                         <span>${data.task}</span>
                         <span class="timestamp">${formatTimestamp(data.timestamp_update)}</span>
@@ -165,6 +186,12 @@
                     </div>`;
                 }
             });
+
+            if (!hasRemovedTasks || querySnapshot.empty) {
+                tasks.innerHTML = `<div class="task">
+                    <span class="no-task">No task in the trash.</span>
+                </div>`;
+            }
         }
 
         window.submitTask = async function submitTask() {
@@ -182,7 +209,7 @@
                 });
 
                 taskInput.value = "";
-                fetchData();
+                pendingTasks();
             }
         }
 
@@ -197,7 +224,7 @@
                     timestamp_update: serverTimestamp()
                 });
 
-                fetchData();
+                pendingTasks();
             }
         }
 
@@ -211,7 +238,7 @@
                 timestamp_update: serverTimestamp()
             });
 
-            fetchData();
+            pendingTasks();
         }
 
         window.restoreTask = async function restoreTask(id) {

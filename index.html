@@ -38,7 +38,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
         import {
-            getFirestore, collection, getDocs, doc, addDoc, serverTimestamp, updateDoc, deleteDoc
+            getFirestore, collection, getDocs, doc, query, orderBy, addDoc, serverTimestamp, updateDoc, deleteDoc
         } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -120,7 +120,9 @@
         }
 
         async function pendingTasks() {
-            const querySnapshot = await getDocs(collection(db, "todo-list"));
+            const querySnapshot = await getDocs(
+                query(collection(db, "todo-list"), orderBy("timestamp", "asc"))
+            );
             let hasPendingTasks = false;
             tasks.innerHTML = "";
 
@@ -148,7 +150,9 @@
         }
 
         async function completedTasks() {
-            const querySnapshot = await getDocs(collection(db, "todo-list"));
+            const querySnapshot = await getDocs(
+                query(collection(db, "todo-list"), orderBy("timestamp_update", "asc"))
+            );
             let hasCompletedTasks = false;
             tasks.innerHTML = "";
 
@@ -172,7 +176,9 @@
         }
 
         async function trashTasks() {
-            const querySnapshot = await getDocs(collection(db, "todo-list"));
+            const querySnapshot = await getDocs(
+                query(collection(db, "todo-list"), orderBy("timestamp_update", "asc"))
+            );
             let hasRemovedTasks = false;
             tasks.innerHTML = "";
 

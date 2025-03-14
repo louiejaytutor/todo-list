@@ -18,15 +18,14 @@
 }
 
 body {
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     background: linear-gradient(135deg, var(--color-1), var(--color-5));
 }
 
 .header {
-    width: 100%;
-    max-width: 450px;
+    width: 450px;
     background-color: #fff;
     margin: auto;
     margin-top: 30px;
@@ -61,7 +60,6 @@ body {
     border-radius: 30px;
     padding-left: 20px;
     margin-top: 40px;
-    width: 100%;
 }
 .header .new-task input {
     flex: 1;
@@ -83,8 +81,7 @@ body {
 }
 
 .tasks {
-    width: 100%;
-    max-width: 450px;
+    width: 450px;
     background-color: #fff;
     margin: auto;
     padding: 30px;
@@ -129,3 +126,10 @@ body {
 .task .buttons button:hover {
     background-color: var(--gray-2);
 }
+
+@media screen and (max-width: 500px) {
+    .header,
+    .tasks {
+      width: 100%;
+    }
+  }

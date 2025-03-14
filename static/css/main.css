@@ -136,6 +136,6 @@ body {
 
 @media screen and (max-width: 510px) {
     .header {
-        margin-top: 20px;
+        margin-top: 10px;
     }
 }

@@ -97,7 +97,7 @@
         });
 
         function scaleBody() {
-            if (window.innerWidth <= 510) {
+            if (window.innerWidth <= 470) {
                 let scaleValue = (window.innerWidth / 470);
             
                 document.body.style.transform = `scale(${scaleValue})`;
@@ -106,8 +106,7 @@
         }
 
         async function showLoader() {
-            tasks.innerHTML = "";
-            tasks.innerHTML = tasks.innerHTML + `<div id="loader" class="loader">
+            tasks.innerHTML = `<div id="loader" class="loader">
                 <span class="loader-text">loading</span>
                 <span class="load"></span>
             </div>`;

@@ -64,7 +64,6 @@
         scaleBody();
         pendingTasks();
 
-        window.addEventListener("load", scaleBody);
         window.addEventListener("resize", scaleBody);
 
         pending_btn.addEventListener("click", function() {
@@ -208,13 +207,12 @@
         }
 
         window.submitTask = async function submitTask() {
-            showLoader();
-            
             let taskInput = document.getElementById("task");
             if (taskInput.value == "") {
                 alert("Please input task.");
             }
             else {
+                showLoader();
                 await addDoc(collection(db, "todo-list"), {
                     task: taskInput.value,
                     status: "pending",

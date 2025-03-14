@@ -32,6 +32,7 @@
             </div>
         </div>
     </div>
+    <script src="static/js/main.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -61,7 +62,6 @@
         const new_task = document.getElementById("new-task");
         const tasks = document.getElementById("tasks");
 
-        scaleBody();
         pendingTasks();
 
         window.addEventListener("resize", scaleBody);
@@ -98,15 +98,6 @@
             showLoader();
             trashTasks();
         });
-
-        function scaleBody() {
-            if (window.innerWidth <= 490) {
-                let scaleValue = (window.innerWidth / 490);
-            
-                document.body.style.transform = `scale(${scaleValue})`;
-                document.body.style.transformOrigin = "top center";
-            }
-        }
 
         async function showLoader() {
             tasks.innerHTML = `<div id="loader" class="loader">

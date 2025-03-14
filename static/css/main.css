@@ -18,7 +18,7 @@
 }
 
 body {
-    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     justify-content: center;
     background: linear-gradient(135deg, var(--color-1), var(--color-5));
@@ -59,6 +59,7 @@ body {
     background-color: var(--gray-2);
     border-radius: 30px;
     margin-top: 40px;
+    width: 100%;
 }
 .header .new-task input {
     flex: 1;
@@ -134,7 +135,7 @@ body {
 }
 
 
-@media screen and (max-width: 510px) {
+@media screen and (max-width: 470px) {
     .header {
         margin-top: 10px;
     }

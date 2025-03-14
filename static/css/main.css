@@ -1,9 +1,9 @@
 :root {
-    --color-1: #ffb6c1;
-    --color-2: #ffd1dc;
-    --color-3: #ffe4e1;
-    --color-4: #fff0f5;
-    --color-5: #faebd7;
+    --pink-1: #ffb6c1;
+    --pink-2: #ffd1dc;
+    --pink-3: #ffe4e1;
+    --pink-4: #fff0f5;
+    --pink-5: #faebd7;
 
     --gray-1: #757575;
     --gray-2: #edeef0;
@@ -21,7 +21,7 @@ body {
     min-height: 100dvh;
     display: flex;
     justify-content: center;
-    background: linear-gradient(135deg, var(--color-1), var(--color-5));
+    background: linear-gradient(135deg, var(--pink-1), var(--pink-5));
 }
 
 .header {
@@ -49,7 +49,7 @@ body {
 }
 .header .navigation .active {
     color: #fff;
-    background-color: var(--color-1);
+    background-color: var(--pink-1);
     border-radius: 40px;
 }
 .header .new-task {
@@ -75,7 +75,7 @@ body {
     border: none;
     outline: none;
     padding: 11px 40px;
-    background-color: var(--color-1);
+    background-color: var(--pink-1);
     color: #fff;
     font-size: 15px;
     cursor: pointer;

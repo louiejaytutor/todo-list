@@ -67,6 +67,7 @@
         window.addEventListener("resize", scaleBody);
 
         pending_btn.addEventListener("click", function() {
+            document.title = "Dane's To-Do List";
             pending_btn.classList.add("active");
             completed_btn.classList.remove("active");
             trash_btn.classList.remove("active");
@@ -77,6 +78,7 @@
         });
 
         completed_btn.addEventListener("click", function() {
+            document.title = "Completed - Dane's To-Do List";
             pending_btn.classList.remove("active");
             completed_btn.classList.add("active");
             trash_btn.classList.remove("active");
@@ -87,6 +89,7 @@
         });
 
         trash_btn.addEventListener("click", function() {
+            document.title = "Trash - Dane's To-Do List";
             pending_btn.classList.remove("active");
             completed_btn.classList.remove("active");
             trash_btn.classList.add("active");

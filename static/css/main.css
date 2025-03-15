@@ -7,6 +7,8 @@
 
     --gray-1: #757575;
     --gray-2: #edeef0;
+
+    --red-1: #ff6f61;
 }
 
 * {
@@ -28,7 +30,7 @@ body {
     width: 450px;
     background-color: #fff;
     margin: auto;
-    margin-top: 30px;
+    margin-top: 10px;
     margin-bottom: 10px;
     padding: 30px;
     border-radius: 10px;
@@ -68,18 +70,30 @@ body {
     background-color: transparent;
     padding: 10px;
     font-weight: 14px;
-    padding-left: 20px;
-    width: calc(100% - 20px);
+    text-indent: 20px;
+    width: 100%;
 }
-.header .new-task button {
+.header .new-task button:nth-child(3) {
     border: none;
     outline: none;
-    padding: 11px 40px;
+    padding: 11px;
+    background-color: var(--red-1);
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+    border-top-left-radius: 40px;
+    border-bottom-left-radius: 40px;
+}
+.header .new-task button:nth-child(4) {
+    border: none;
+    outline: none;
+    padding: 11px 20px;
     background-color: var(--pink-1);
     color: #fff;
     font-size: 15px;
     cursor: pointer;
-    border-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
 }
 
 .tasks {
@@ -88,6 +102,8 @@ body {
     margin: auto;
     padding: 30px;
     border-radius: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 .task {
     display: flex;
@@ -133,11 +149,4 @@ body {
 }
 .task .buttons button:hover {
     background-color: var(--gray-2);
-}
-
-
-@media screen and (max-width: 490px) {
-    .header {
-        margin-top: 10px;
-    }
 }

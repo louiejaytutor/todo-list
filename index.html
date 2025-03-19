@@ -6,7 +6,6 @@
     <title>Dane's To-Do List</title>
     <link rel="icon" href="static/img/icon.png">
     <link rel="apple-touch-icon" href="static/img/icon.png">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Pixelify Sans">
     <link rel="stylesheet" href='https://fonts.googleapis.com/css?family=Poppins'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="static/css/main.css">
@@ -15,24 +14,36 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>Dane's To-Do List 📝</h2>
+            <div class="title">Dane's To-Do List</div>
             <div class="navigation">
-                <button id="pending-tasks" class="active"><i class="fas fa-pencil-alt"></i> Pending</a>
-                <button id="completed-tasks"><i class="fas fa-check-double"></i> Completed</a>
-                <button id="trash-tasks"><i class="fas fa-trash-alt"></i> Trash</a>
-            </div>
-            <div id="new-task" class="new-task">
-                <input type="hidden" id="task-id">
-                <input type="text" id="task" placeholder="Task to be done..." autocomplete="off">
-                <button id="edit-task-btn" style="display: none;"><i class="fas fa-times-circle"></i></button>
-                <button onclick="submitTask()">Submit</button>
+                <a id="pending-nav-btn" href="javascript:void(0)" class="active">Undone</a>
+                <a id="completed-nav-btn" href="javascript:void(0)">Completed</a>
+                <a id="trash-nav-btn" href="javascript:void(0)">Trash</a>
             </div>
         </div>
-        <div id="tasks" class="tasks">
-            <div id="loader" class="loader">
-                <span class="loader-text">loading</span>
-                <span class="load"></span>
+        <div class="tasks">
+            <div class="tasks-header">
+                Tasks
             </div>
+            <div id="task-list" class="task-list"></div>
+        </div>
+        <div id="task-action" class="task-action">
+            <div class="task-form-action">
+                <div id="task-action-title" class="task-action-title">New Task</div>
+                <input type="hidden" id="task-id">
+                <input id="task-input" placeholder="What do you need to do?" class="task-action-input">
+                <div id="task-created" class="task-timestamp"></div>
+                <div id="task-updated" class="task-timestamp"></div>
+            </div>
+        </div>
+        <div id="action-btns" class="action-btns active">
+            <button id="restore-btn"><i class="fas fa-trash-restore"></i></button>
+            <button id="complete-btn"><i class="fas fa-check"></i></button>
+            <button id="trash-btn"><i class="fas fa-trash"></i></button>
+            <button id="delete-btn"><i class="fas fa-trash"></i></button>
+            <button id="save-btn"><i class="fas fa-save"></i></button>
+            <button id="add-btn" class="active"><i class="fas fa-plus"></i></button>
+            <button id="close-btn"><i class="fas fa-times"></i></button>
         </div>
     </div>
     <script src="static/js/main.js"></script>
@@ -53,87 +64,186 @@
             appId: "1:1954381734:web:466c42e5ddbcea8dcd1967",
             measurementId: "G-2RK9RRWMC2"
         };
-        
+
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const db = getFirestore(app);
 
-        const pending_btn = document.getElementById("pending-tasks");
-        const completed_btn = document.getElementById("completed-tasks");
-        const trash_btn = document.getElementById("trash-tasks");
-
-        const new_task = document.getElementById("new-task");
-        const edit_task_btn = document.getElementById("edit-task-btn");
-        const tasks = document.getElementById("tasks");
-
+        loader();
         pendingTasks();
 
-        window.addEventListener("resize", scaleBody);
+        pending_nav_btn.addEventListener("click", function() {
+            pending_nav_btn.classList.add("active");
+            completed_nav_btn.classList.remove("active");
+            trash_nav_btn.classList.remove("active");
+            task_action_btns.classList.add("active");
 
-        pending_btn.addEventListener("click", function() {
-            document.title = "Dane's To-Do List";
-            pending_btn.classList.add("active");
-            completed_btn.classList.remove("active");
-            trash_btn.classList.remove("active");
-            new_task.style.display = "flex";
-
-            clearSubmitTask();
-            showLoader();
+            loader();
             pendingTasks();
         });
 
-        completed_btn.addEventListener("click", function() {
-            document.title = "Completed - Dane's To-Do List";
-            pending_btn.classList.remove("active");
-            completed_btn.classList.add("active");
-            trash_btn.classList.remove("active");
-            new_task.style.display = "none";
+        completed_nav_btn.addEventListener("click", function() {
+            pending_nav_btn.classList.remove("active");
+            completed_nav_btn.classList.add("active");
+            trash_nav_btn.classList.remove("active");
+            task_action_btns.classList.remove("active");
 
-            clearSubmitTask();
-            showLoader();
+            loader();
             completedTasks();
         });
 
-        trash_btn.addEventListener("click", function() {
-            document.title = "Trash - Dane's To-Do List";
-            pending_btn.classList.remove("active");
-            completed_btn.classList.remove("active");
-            trash_btn.classList.add("active");
-            new_task.style.display = "none";
+        trash_nav_btn.addEventListener("click", function() {
+            pending_nav_btn.classList.remove("active");
+            completed_nav_btn.classList.remove("active");
+            trash_nav_btn.classList.add("active");
+            task_action_btns.classList.remove("active");
 
-            clearSubmitTask();
-            showLoader();
+            loader();
             trashTasks();
         });
 
-        edit_task_btn.addEventListener("click", function() {
-            clearSubmitTask();
-        });
+        
 
-        async function showLoader() {
-            tasks.innerHTML = `<div id="loader" class="loader">
-                <span class="loader-text">loading</span>
-                <span class="load"></span>
-            </div>`;
+        window.taskInfo = async function taskInfo(id) {
+            const task_icon = document.getElementById(id);
+            task_icon.innerHTML = `<i class="fas fa-check-circle"></i>`;
+            task_icon.classList.add("active");
+
+            save_btn.classList.add("active");
+            complete_btn.classList.add("active");
+            trash_btn.classList.add("active");
+            add_btn.classList.remove("active");
+            close_btn.classList.add("active");
+            task_action.classList.add("active");
+
+            task_id.value = id;
+
+            const taskRef = doc(db, "todo-list", id);
+            const taskSnap = await getDoc(taskRef);
+            if (taskSnap.exists()) {
+                const data = taskSnap.data();
+                task_title.innerHTML = "Task Info";
+                task_input.value = data.task;
+                task_created.innerHTML = "Created on <b>" + formatTimestamp(data.timestamp) + "</b>";
+                task_updated.innerHTML = (data.timestamp_update == null ? "" : "Last updated on <b>" + formatTimestamp(data.timestamp_update) + "</b>");
+            }
+            else {
+                alert("No such task found!");
+            }
         }
 
-        async function clearSubmitTask() {
-            document.getElementById("task-id").value = "";
-            document.getElementById("task").value = "";
-            edit_task_btn.style.display = "none";
+        window.submitTask = async function submitTask() {
+            if (task_input.value == "") {
+                alert("Please input task.");
+            }
+            else {
+                loader();
+
+                if (task_id.value == "") {
+                    await addDoc(collection(db, "todo-list"), {
+                        task: task_input.value,
+                        status: "pending",
+                        timestamp: serverTimestamp()
+                    });
+                }
+                else {
+                    const taskRef = doc(db, "todo-list", task_id.value);
+
+                    await updateDoc(taskRef, {
+                        task: task_input.value,
+                        timestamp_update: serverTimestamp()
+                    });
+                }
+
+                clearTaskForm();
+                pendingTasks();
+            }
         }
 
-        function formatTimestamp(timestamp) {
-            const date = timestamp.toDate();
-            return date.toLocaleString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true
+        window.completeTask = async function completeTask() {            
+            if (confirm("Are you sure you want to complete this task?")) {
+                loader();
+
+                const taskRef = doc(db, "todo-list", task_id.value);
+
+                await updateDoc(taskRef, {
+                    status: "completed",
+                    timestamp_update: serverTimestamp()
+                });
+
+                clearTaskForm();
+                pendingTasks();
+            }
+        }
+
+        window.removeTask = async function removeTask() {
+            loader();
+
+            const taskRef = doc(db, "todo-list", task_id.value);
+
+            await updateDoc(taskRef, {
+                status: "removed",
+                timestamp_update: serverTimestamp()
             });
+
+            clearTaskForm();
+            pendingTasks();
+        }
+
+        window.trashTaskInfo = async function trashTaskInfo(id) {
+            const task_icon = document.getElementById(id);
+            task_icon.innerHTML = `<i class="fas fa-check-circle"></i>`;
+            task_icon.classList.add("active");
+
+            restore_btn.classList.add("active");
+            delete_btn.classList.add("active");
+            close_btn.classList.add("active");
+            add_btn.classList.remove("active");
+            task_action.classList.add("active");
+            task_action_btns.classList.add("active");
+
+            task_id.value = id;
+            task_input.disabled = true;
+
+            const taskRef = doc(db, "todo-list", id);
+            const taskSnap = await getDoc(taskRef);
+            if (taskSnap.exists()) {
+                const data = taskSnap.data();
+                task_title.innerHTML = "Task Info";
+                task_input.value = data.task;
+                task_created.innerHTML = "Created on <b>" + formatTimestamp(data.timestamp) + "</b>";
+                task_updated.innerHTML = "Last updated on <b>" + formatTimestamp(data.timestamp_update) + "</b>";
+            }
+            else {
+                alert("No such task found!");
+            }
+        }
+
+        window.restoreTask = async function restoreTask() {
+            loader();
+
+            const taskRef = doc(db, "todo-list", task_id.value);
+
+            await updateDoc(taskRef, {
+                status: "pending",
+                timestamp_update: serverTimestamp()
+            });
+
+            clearTaskForm();
+            trashTasks();
+        }
+
+        window.deleteTask = async function deleteTask() {
+            if (confirm("Are you sure you want to permanently delete this task?")) {
+                loader();
+
+                const taskRef = doc(db, "todo-list", task_id.value);
+
+                await deleteDoc(taskRef);
+
+                clearTaskForm();
+                trashTasks();
+            }
         }
 
         async function pendingTasks() {
@@ -141,28 +251,26 @@
                 query(collection(db, "todo-list"), orderBy("timestamp", "asc"))
             );
             let hasPendingTasks = false;
-            tasks.innerHTML = "";
+            task_list.innerHTML = "";
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 if (data.status == "pending") {
                     hasPendingTasks = true;
 
-                    tasks.innerHTML = tasks.innerHTML + `<div class="task">
-                        <span>${data.task}</span>
-                        <span class="timestamp">${formatTimestamp(data.timestamp)}</span>
-                        <div class="buttons">
-                            <button onclick="completeTask('${doc.id}')"><i class="fas fa-check-circle"></i></button>
-                            <button onclick="editTask('${doc.id}')"><i class="fas fa-edit"></i></button>
-                            <button onclick="removeTask('${doc.id}')"><i class="fas fa-trash-alt"></i></button>
+                    task_list.innerHTML = task_list.innerHTML + `<div onclick="taskInfo('${doc.id}')" class="task">
+                        <div class="task-left">
+                            <div class="task-title">${data.task}</div>
+                            <div class="task-timestamp">${formatTimestamp(data.timestamp)}</div>
                         </div>
+                        <div id="${doc.id}" class="task-checkbox"><i class="far fa-check-circle"></i></div>
                     </div>`;
                 }
             });
 
             if (!hasPendingTasks || querySnapshot.empty) {
-                tasks.innerHTML = `<div class="task">
-                    <span class="no-task">No pending tasks.</span>
+                task_list.innerHTML = `<div class="task">
+                    No pending tasks.
                 </div>`;
             }
         }
@@ -172,23 +280,26 @@
                 query(collection(db, "todo-list"), orderBy("timestamp_update", "asc"))
             );
             let hasCompletedTasks = false;
-            tasks.innerHTML = "";
+            task_list.innerHTML = "";
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 if (data.status == "completed") {
                     hasCompletedTasks = true;
 
-                    tasks.innerHTML = tasks.innerHTML + `<div class="task">
-                        <span>${data.task}</span>
-                        <span class="timestamp">${formatTimestamp(data.timestamp_update)}</span>
+                    task_list.innerHTML = task_list.innerHTML + `<div class="task">
+                        <div class="task-left">
+                            <div class="task-title">${data.task}</div>
+                            <div class="task-timestamp">${formatTimestamp(data.timestamp_update)}</div>
+                        </div>
+                        <div id="${doc.id}" class="task-checkbox"><i class="fas fa-check-circle"></i></div>
                     </div>`;
                 }
             });
 
             if (!hasCompletedTasks || querySnapshot.empty) {
-                tasks.innerHTML = `<div class="task">
-                    <span class="no-task">No completed tasks.</span>
+                task_list.innerHTML = `<div class="task">
+                    No completed tasks.
                 </div>`;
             }
         }
@@ -198,128 +309,40 @@
                 query(collection(db, "todo-list"), orderBy("timestamp_update", "asc"))
             );
             let hasRemovedTasks = false;
-            tasks.innerHTML = "";
+            task_list.innerHTML = "";
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 if (data.status == "removed") {
                     hasRemovedTasks = true;
 
-                    tasks.innerHTML = tasks.innerHTML + `<div class="task">
-                        <span>${data.task}</span>
-                        <span class="timestamp">${formatTimestamp(data.timestamp_update)}</span>
-                        <div class="buttons">
-                            <button onclick="restoreTask('${doc.id}')"><i class="fas fa-trash-restore"></i></button>
-                            <button onclick="deleteTask('${doc.id}')"><i class="fas fa-trash-alt"></i></button>
+                    task_list.innerHTML = task_list.innerHTML + `<div onclick="trashTaskInfo('${doc.id}')" class="task">
+                        <div class="task-left">
+                            <div class="task-title">${data.task}</div>
+                            <div class="task-timestamp">${formatTimestamp(data.timestamp_update)}</div>
                         </div>
+                        <div id="${doc.id}" class="task-checkbox"><i class="far fa-check-circle"></i></div>
                     </div>`;
                 }
             });
 
             if (!hasRemovedTasks || querySnapshot.empty) {
-                tasks.innerHTML = `<div class="task">
-                    <span class="no-task">No tasks in the trash.</span>
+                task_list.innerHTML = `<div class="task">
+                    No tasks in the trash.
                 </div>`;
             }
         }
 
-        window.submitTask = async function submitTask() {
-            let taskId = document.getElementById("task-id");
-            let taskInput = document.getElementById("task");
-            
-            if (taskInput.value == "") {
-                alert("Please input task.");
-            }
-            else {
-                showLoader();
-                if (taskId.value == "") {
-                    await addDoc(collection(db, "todo-list"), {
-                        task: taskInput.value,
-                        status: "pending",
-                        timestamp: serverTimestamp()
-                    });
-                }
-                else {
-                    const taskRef = doc(db, "todo-list", taskId.value);
-
-                    await updateDoc(taskRef, {
-                        task: taskInput.value,
-                        timestamp_update: serverTimestamp()
-                    });
-                }
-
-                clearSubmitTask();
-                pendingTasks();
-            }
-        }
-
-        window.completeTask = async function completeTask(id) {            
-            if (confirm("Are you sure you want to complete this task?")) {
-                showLoader();
-
-                const taskRef = doc(db, "todo-list", id);
-
-                await updateDoc(taskRef, {
-                    status: "completed",
-                    timestamp_update: serverTimestamp()
-                });
-
-                pendingTasks();
-            }
-        }
-
-        window.editTask = async function editTask(id) {            
-            const taskRef = doc(db, "todo-list", id);
-            const taskSnap = await getDoc(taskRef);
-
-            if (taskSnap.exists()) {
-                const taskData = taskSnap.data();
-
-                document.getElementById("task-id").value = id;
-                document.getElementById("task").value = taskData.task;
-                edit_task_btn.style.display = "block";
-            }
-            else {
-                alert("No such task found!");
-            }
-        }
-
-        window.removeTask = async function removeTask(id) {
-            showLoader();
-            
-            const taskRef = doc(db, "todo-list", id);
-
-            await updateDoc(taskRef, {
-                status: "removed",
-                timestamp_update: serverTimestamp()
-            });
-
-            pendingTasks();
-        }
-
-        window.restoreTask = async function restoreTask(id) {
-            showLoader();
-
-            const taskRef = doc(db, "todo-list", id);
-
-            await updateDoc(taskRef, {
-                status: "pending",
-                timestamp_update: serverTimestamp()
-            });
-
-            trashTasks();
-        }
-
-        window.deleteTask = async function deleteTask(id) {
-            if (confirm("Are you sure you want to permanently delete this task?")) {
-                showLoader();
-
-                const taskRef = doc(db, "todo-list", id);
-
-                await deleteDoc(taskRef);
-
-                trashTasks();
-            }
+        function formatTimestamp(timestamp) {
+            const date = timestamp.toDate();
+            return date.toLocaleString("en-GB", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true
+            }).replace(",", "");
         }
     </script>
 </body>

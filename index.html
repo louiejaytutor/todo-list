@@ -137,9 +137,9 @@
                 alert("Please input task.");
             }
             else {
-                loader();
-
                 if (task_id.value == "") {
+                    loader();
+
                     await addDoc(collection(db, "todo-list"), {
                         task: task_input.value,
                         status: "pending",
@@ -148,15 +148,29 @@
                 }
                 else {
                     const taskRef = doc(db, "todo-list", task_id.value);
+                    const taskSnap = await getDoc(taskRef);
 
-                    await updateDoc(taskRef, {
-                        task: task_input.value,
-                        timestamp_update: serverTimestamp()
-                    });
+                    if (taskSnap.exists()) {
+                        const data = taskSnap.data();
+                        if (task_input.value != data.task) {
+                            loader();
+
+                            await updateDoc(taskRef, {
+                                task: task_input.value,
+                                timestamp_update: serverTimestamp()
+                            });
+
+                            clearTaskForm();
+                            pendingTasks();
+                        }
+                        else {
+                            alert("No changes were made to the task name.");
+                        }
+                    }
+                    else {
+                        alert("No such task found!");
+                    }
                 }
-
-                clearTaskForm();
-                pendingTasks();
             }
         }
 

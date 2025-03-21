@@ -226,7 +226,7 @@
                 task_title.innerHTML = "Task Info";
                 task_input.value = data.task;
                 task_created.innerHTML = "Created on <b>" + formatTimestamp(data.timestamp) + "</b>";
-                task_updated.innerHTML = "Last updated on <b>" + formatTimestamp(data.timestamp_update) + "</b>";
+                task_updated.innerHTML = "Added to trash on <b>" + formatTimestamp(data.timestamp_update) + "</b>";
             }
             else {
                 alert("No such task found!");

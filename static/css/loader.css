@@ -1,3 +1,9 @@
+.loader {
+    left: 50%;
+    top: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%) matrix(1, 0, 0, 1, 0, 0);
+}
 #outline {
     stroke-dasharray: 2.42777px, 242.77666px;
     stroke-dashoffset: 0;

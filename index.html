@@ -145,6 +145,9 @@
                         status: "pending",
                         timestamp: serverTimestamp()
                     });
+
+                    clearTaskForm();
+                    pendingTasks();
                 }
                 else {
                     const taskRef = doc(db, "todo-list", task_id.value);
